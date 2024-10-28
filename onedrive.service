@@ -1,0 +1,23 @@
+[Unit]
+Description=Onedrive mount (rclone)
+Documentation=man:rcloud(1)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=notify
+ExecStartPre=mkdir /mnt/%u/serieUni
+ExecStart=/usr/bin/rclone mount \
+	--vfs-cache-mode full \
+	--transfers 8 \
+	--log-systemd --log-level INFO \
+	onedrive:serieUni /mnt/%u/serieUni
+ExecStartPost=ln -s /mnt/%u/serieUni %h/Documents/serieUni
+
+ExecStop=unlink %h/Documents/serieUni
+ExecStop=/usr/bin/fusermount -uz /mnt/%u/serieUni
+ExecStopPost=rmdir /mnt/%u/serieUni
+
+Restart=on-failure
+RestartSec=5s
+
